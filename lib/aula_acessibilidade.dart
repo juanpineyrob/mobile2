@@ -255,10 +255,16 @@ class AulaAcessibilidadePage extends StatelessWidget {
 }
 
 // -----------------------------------------------------------------------------
-// Widget auxiliar: cada linha do card (ícone + label + valor). Se o valor
-// fosse dinâmico e precisasse de uma leitura específica pro leitor de tela
-// (ex.: "Telefone: 11 98765 4321"), vocês poderiam envolver com Semantics
-// e passar um label customizado.
+// _PerfilRow: uma linha do card (ícone + label + valor).
+//
+// Sem o que a gente fez aqui embaixo, o leitor de tela leria o label e o valor
+// em nós separados — por exemplo "Cargo" e depois "Desenvolvedora Mobile".
+// Para soar natural, queremos uma frase só: "Cargo: Desenvolvedora Mobile".
+//
+// Por isso envolvemos a Row em MergeSemantics (junta os nós em um) e
+// Semantics(label: '$label: $value') (define o texto único que será lido).
+// O ícone e os textos visuais ficam em ExcludeSemantics para não serem
+// anunciados de novo — o leitor só ouve o label que a gente definiu.
 // -----------------------------------------------------------------------------
 class _PerfilRow extends StatelessWidget {
   const _PerfilRow({
@@ -273,32 +279,41 @@ class _PerfilRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 22, color: Colors.grey.shade700),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.grey.shade600,
+    return MergeSemantics(
+      child: Semantics(
+        label: '$label: $value',
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ExcludeSemantics(
+              child: Icon(icon, size: 22, color: Colors.grey.shade700),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ExcludeSemantics(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Colors.grey.shade600,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      value,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.grey.shade900,
+                          ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey.shade900,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
