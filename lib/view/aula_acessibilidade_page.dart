@@ -13,10 +13,7 @@ import '../viewmodel/aula_acessibilidade_view_model.dart';
 // =============================================================================
 
 class AulaAcessibilidadePage extends StatelessWidget {
-  const AulaAcessibilidadePage({
-    super.key,
-    required this.viewModel,
-  });
+  const AulaAcessibilidadePage({super.key, required this.viewModel});
 
   final AulaAcessibilidadeViewModel viewModel;
 
@@ -89,9 +86,9 @@ class AulaAcessibilidadePage extends StatelessWidget {
               child: Text(
                 'Maria Silva',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Colors.grey.shade900,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: Colors.grey.shade900,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
 
@@ -106,9 +103,9 @@ class AulaAcessibilidadePage extends StatelessWidget {
             // -----------------------------------------------------------------
             Text(
               'maria.silva@email.com',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey.shade700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: Colors.grey.shade700),
             ),
 
             const SizedBox(height: 32),
@@ -166,9 +163,7 @@ class AulaAcessibilidadePage extends StatelessWidget {
             // -----------------------------------------------------------------
             MergeSemantics(
               child: ListTile(
-                leading: const ExcludeSemantics(
-                  child: Icon(Icons.settings),
-                ),
+                leading: const ExcludeSemantics(child: Icon(Icons.settings)),
                 title: const Text('Configurações Avançadas'),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {},
@@ -246,9 +241,9 @@ class AulaAcessibilidadePage extends StatelessWidget {
             Text(
               'O bloco acima tem contraste ruim de propósito. Nos seus apps, usem cores que passem no teste 4,5:1 (ex.: WebAIM Contrast Checker).',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade700,
-                    fontStyle: FontStyle.italic,
-                  ),
+                color: Colors.grey.shade700,
+                fontStyle: FontStyle.italic,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -290,7 +285,7 @@ class _PerfilRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ExcludeSemantics(
-              child: Icon(icon, size: 22, color: Colors.grey.shade700),
+              child: Icon(icon, size: 22, color: Colors.grey.shade900),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -301,15 +296,15 @@ class _PerfilRow extends StatelessWidget {
                     Text(
                       label,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Colors.grey.shade600,
-                          ),
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       value,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.grey.shade900,
-                          ),
+                        color: Colors.grey.shade900,
+                      ),
                     ),
                   ],
                 ),
