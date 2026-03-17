@@ -5,9 +5,6 @@ import '../viewmodel/aula_entrada_permissoes_view_model.dart';
 // =============================================================================
 // AULA — GERENCIAMENTO DE ENTRADA E PERMISSÕES DO SO (1.1.2) — VERSÃO RESOLVIDA
 // =============================================================================
-// Esta é a versão completa usada pelo professor. A versão que os alunos recebem
-// em aula (aula_entrada_permissoes_page.dart) esconde partes com // TODO.
-// =============================================================================
 
 class AulaEntradaPermissoesPage extends StatefulWidget {
   const AulaEntradaPermissoesPage({super.key});
@@ -50,7 +47,9 @@ class _AulaEntradaPermissoesPageState extends State<AulaEntradaPermissoesPage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
       behavior: HitTestBehavior.opaque,
       child: Scaffold(
         appBar: AppBar(
@@ -86,11 +85,12 @@ class _AulaEntradaPermissoesPageState extends State<AulaEntradaPermissoesPage> {
                             hintText: 'Digite seu nome',
                           ),
                           textInputAction: TextInputAction.next,
-                          onFieldSubmitted: (_) =>
-                              FocusScope.of(context).requestFocus(_emailFocus),
+                          onFieldSubmitted: (_) {
+                            _emailFocus?.requestFocus();
+                          },
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return 'Preencha o nome';
+                              return 'Informe seu nome';
                             }
                             return null;
                           },
@@ -106,13 +106,16 @@ class _AulaEntradaPermissoesPageState extends State<AulaEntradaPermissoesPage> {
                           ),
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
-                          onFieldSubmitted: (_) =>
-                              FocusScope.of(context).requestFocus(_telefoneFocus),
+                          onFieldSubmitted: (_) {
+                            _telefoneFocus?.requestFocus();
+                          },
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return 'Preencha o e-mail';
+                              return 'Informe seu e-mail';
                             }
-                            if (!v.contains('@')) return 'E-mail inválido';
+                            if (!v.contains('@')) {
+                              return 'E-mail inválido';
+                            }
                             return null;
                           },
                         ),
@@ -127,11 +130,12 @@ class _AulaEntradaPermissoesPageState extends State<AulaEntradaPermissoesPage> {
                           ),
                           keyboardType: TextInputType.phone,
                           textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) =>
-                              FocusScope.of(context).unfocus(),
+                          onFieldSubmitted: (_) {
+                            FocusScope.of(context).unfocus();
+                          },
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return 'Preencha o telefone';
+                              return 'Informe seu telefone';
                             }
                             return null;
                           },
@@ -141,12 +145,12 @@ class _AulaEntradaPermissoesPageState extends State<AulaEntradaPermissoesPage> {
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () {
-                              if (_formKey.currentState?.validate() ?? false) {
-                                FocusScope.of(context).unfocus();
+                              FocusScope.of(context).unfocus();
+                              if (_formKey.currentState!.validate()) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      'Enviado: ${_viewModel.nomeController.text}',
+                                      'Olá, ${_viewModel.nomeController.text}!',
                                     ),
                                   ),
                                 );
@@ -180,7 +184,9 @@ class _AulaEntradaPermissoesPageState extends State<AulaEntradaPermissoesPage> {
                             child: OutlinedButton.icon(
                               onPressed: _viewModel.cameraLoading
                                   ? null
-                                  : _viewModel.requestCamera,
+                                  : () {
+                                      _viewModel.requestCamera();
+                                    },
                               icon: _viewModel.cameraLoading
                                   ? const SizedBox(
                                       width: 20,
@@ -198,7 +204,9 @@ class _AulaEntradaPermissoesPageState extends State<AulaEntradaPermissoesPage> {
                             child: OutlinedButton.icon(
                               onPressed: _viewModel.locationLoading
                                   ? null
-                                  : _viewModel.requestLocation,
+                                  : () {
+                                      _viewModel.requestLocation();
+                                    },
                               icon: _viewModel.locationLoading
                                   ? const SizedBox(
                                       width: 20,
@@ -233,4 +241,3 @@ class _AulaEntradaPermissoesPageState extends State<AulaEntradaPermissoesPage> {
     );
   }
 }
-

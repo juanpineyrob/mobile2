@@ -6,10 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 // =============================================================================
 // AULA ENTRADA E PERMISSÕES — VIEW MODEL (MVVM) — VERSÃO RESOLVIDA
 // =============================================================================
-// Esta é a versão completa usada pelo professor. A versão que os alunos recebem
-// em aula (aula_entrada_permissoes_view_model.dart) esconde a lógica principal
-// e marca pontos com // TODO para serem implementados.
-// =============================================================================
 
 class AulaEntradaPermissoesViewModel extends ChangeNotifier {
   AulaEntradaPermissoesViewModel() {
@@ -38,21 +34,21 @@ class AulaEntradaPermissoesViewModel extends ChangeNotifier {
 
   Future<void> requestCamera() async {
     _cameraLoading = true;
-    _cameraStatus = 'Verificando...';
     notifyListeners();
 
-    try {
-      final status = await Permission.camera.status;
-      if (status.isGranted) {
-        _cameraStatus = 'Concedido';
-      } else if (status.isDenied) {
-        final result = await Permission.camera.request();
-        _cameraStatus = result.isGranted ? 'Concedido' : 'Negado';
-      } else {
-        _cameraStatus = 'Negado (permanente ou indisponível)';
-      }
-    } catch (e) {
-      _cameraStatus = 'Erro: $e';
+    var status = await Permission.camera.status;
+    if (!status.isGranted) {
+      status = await Permission.camera.request();
+    }
+
+    if (status.isGranted) {
+      _cameraStatus = 'Concedido';
+    } else if (status.isDenied) {
+      _cameraStatus = 'Negado';
+    } else if (status.isPermanentlyDenied) {
+      _cameraStatus = 'Negado permanentemente';
+    } else {
+      _cameraStatus = 'Status: $status';
     }
 
     _cameraLoading = false;
@@ -61,35 +57,33 @@ class AulaEntradaPermissoesViewModel extends ChangeNotifier {
 
   Future<void> requestLocation() async {
     _locationLoading = true;
-    _locationStatus = 'Solicitando...';
     notifyListeners();
 
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _locationStatus = 'Serviço de localização desligado';
-        _locationLoading = false;
-        notifyListeners();
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        _locationStatus = 'Negado (sempre)';
-      } else if (permission == LocationPermission.denied) {
-        _locationStatus = 'Negado';
-      } else {
-        final pos = await Geolocator.getCurrentPosition();
-        _locationStatus =
-            'Concedido — ${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}';
-      }
-    } catch (e) {
-      _locationStatus = 'Erro: $e';
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _locationStatus = 'Serviço de localização desativado';
+      _locationLoading = false;
+      notifyListeners();
+      return;
     }
+
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      _locationStatus = 'Permissão negada';
+      _locationLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    final position = await Geolocator.getCurrentPosition();
+    _locationStatus =
+        'Lat: ${position.latitude.toStringAsFixed(4)}, '
+        'Lng: ${position.longitude.toStringAsFixed(4)}';
 
     _locationLoading = false;
     notifyListeners();
@@ -103,4 +97,3 @@ class AulaEntradaPermissoesViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
-
