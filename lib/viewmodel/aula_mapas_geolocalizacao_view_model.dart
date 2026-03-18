@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 
 // =============================================================================
 // AULA 1.5 — MAPAS E GEOLOCALIZAÇÃO — VIEW MODEL (MVVM) — VERSÃO EXERCÍCIO
@@ -37,23 +42,35 @@ class AulaMapasGeolocalizacaoViewModel extends ChangeNotifier {
     _mensagemErro = null;
     notifyListeners();
 
-    // TODO: implementar obtenção da localização atual.
-    // Dicas:
-    // 1. Verificar se o serviço de localização está habilitado
-    //    (Geolocator.isLocationServiceEnabled).
-    // 2. Verificar/solicitar permissão (Geolocator.checkPermission e
-    //    Geolocator.requestPermission).
-    // 3. Obter a posição com Geolocator.getCurrentPosition().
-    // 4. Converter para LatLng: LatLng(position.latitude, position.longitude)
-    //    e guardar em _posicaoAtual.
-    // 5. Em caso de erro (catch), guardar a mensagem em _mensagemErro.
-    // 6. Ao final, _loading = false e notifyListeners().
-    //
-    // Não esquecer o import: import 'package:geolocator/geolocator.dart';
-    _loading = false;
-    _posicaoAtual = null;
-    _mensagemErro = 'TODO: implementar obterMinhaLocalizacao()';
-    notifyListeners();
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Los servicios de localización están desactivados.');
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Permisos de ubicación denegados.');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+        'Los permisos de ubicación están denegados permanentemente; no podemos solicitarlos.',
+      );
+    }
+
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      _posicaoAtual = LatLng(position.latitude, position.longitude);
+    } catch (e) {
+      _mensagemErro = 'Error al obtener localización: $e';
+      _posicaoAtual = null;
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
   }
 
   /// Chamado quando o usuário define origem/destino e toca em "Rota até".
@@ -75,8 +92,31 @@ class AulaMapasGeolocalizacaoViewModel extends ChangeNotifier {
     //    Cada item é [longitude, latitude]; converter para LatLng(lat, lng).
     // 4. Atribuir a lista a _pontosRota. Em erro (status != 200 ou exceção), setar _rotaErro.
     // 5. _rotaLoading = false e notifyListeners().
-    _rotaLoading = false;
-    _rotaErro = 'TODO: implementar buscarRota()';
-    notifyListeners();
+
+    print(origem.latitude);
+    print(origem.longitude);
+
+    final uri = Uri.parse(
+      "https://router.project-osrm.org/route/v1/driving/$origem.longitude,$origem.latitude;$destino.longitude,$destino.latitude?overview=full&geometries=geojson",
+    );
+
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+
+      final List coordinates =
+          jsonResponse['routes'][0]['geometry']['coordinates'];
+
+      _pontosRota = coordinates.map((coord) {
+        return LatLng(coord[1], coord[0]);
+      }).toList();
+
+      _rotaLoading = false;
+      notifyListeners();
+    } else {
+      _rotaErro = uri.toString();
+      throw Exception('Error al buscar ruta.');
+    }
   }
 }
